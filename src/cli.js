@@ -29,8 +29,11 @@ create-ljs — 生成 LJS 体系的 Vue3 工程
   -h, --help            显示帮助
 
 示例：
-  npm create ljs@latest my-admin -t rsbuild2
-  npm create ljs@latest my-h5 -t h5 --h5-entry standalone -y
+  npm create ljs@latest my-admin rsbuild2
+  npm create ljs@latest my-h5 h5 standalone
+  npm create ljs@latest my-admin -- -t rsbuild2 -y   # 显式分隔，脚本/CI 推荐
+
+注意：npm create 会丢掉 - 开头的参数，故本 CLI 支持裸值形式（如上）。
 `;
 
 /**
@@ -46,6 +49,11 @@ function parseArgs(argv) {
     list: false,
     help: false,
   };
+
+  /** 已知模板 id，用于把裸参数识别成 --template */
+  const templateIds = TEMPLATES.map((t) => t.id);
+  /** 已知 H5 入口值，用于把裸参数识别成 --h5-entry */
+  const entryModes = ['miniprogram', 'standalone'];
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -70,7 +78,16 @@ function parseArgs(argv) {
         opts.help = true;
         break;
       default:
-        if (!arg.startsWith('-') && !opts.dirName) {
+        if (arg.startsWith('-')) break;
+
+        // 位置参数容错：npm create 会过滤掉 - 开头的参数，
+        // 导致 `npm create ljs my-app -t h5 -y` 里只剩裸值传进来。
+        // 这里按「已知值」反推语义，让不带 -- 也能用。
+        if (templateIds.includes(arg)) {
+          opts.template = arg;
+        } else if (entryModes.includes(arg)) {
+          opts.h5Entry = arg;
+        } else if (!opts.dirName) {
           opts.dirName = arg;
         }
     }
@@ -150,13 +167,18 @@ export async function run(argv) {
 
   stdout.write('\n  create-ljs — LJS 体系脚手架\n');
 
+  // npm create 会丢掉 - 开头的参数，-y 常常传不进来。
+  // 只要模板已明确指定，就按非交互处理：此时用户意图已足够清晰，
+  // 继续弹出选择框反而会卡住 AI / CI。
+  const nonInteractive = opts.yes || Boolean(opts.template);
+
   // 1. 目录名
-  const dirName = opts.dirName || (opts.yes ? 'ljs-app' : await inputPrompt('项目目录名', 'ljs-app'));
+  const dirName = opts.dirName || (nonInteractive ? 'ljs-app' : await inputPrompt('项目目录名', 'ljs-app'));
 
   // 2. 模板
   let templateId = opts.template;
   if (!templateId) {
-    if (opts.yes) {
+    if (nonInteractive) {
       templateId = 'rsbuild2';
     } else {
       templateId = await selectPrompt(
@@ -177,7 +199,9 @@ export async function run(argv) {
   const answers = {};
   for (const question of template.questions) {
     if (question.key === 'entry') {
-      answers.entry = opts.yes ? opts.h5Entry : await selectPrompt(question.message, question.options);
+      answers.entry = nonInteractive
+        ? opts.h5Entry
+        : await selectPrompt(question.message, question.options);
     }
   }
 

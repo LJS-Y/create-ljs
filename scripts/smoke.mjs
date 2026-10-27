@@ -38,6 +38,14 @@ const CASES = [
     args: ['-t', 'h5', '--h5-entry', 'standalone', '-y'],
     extra: ['src/views/login'],
   },
+  {
+    // npm create 会过滤 - 开头的参数，只剩裸值。此处模拟该场景，
+    // 验证不带 -t 也能按位置参数识别模板并进入非交互模式。
+    id: 'bare args（模拟 npm create 过滤）',
+    dir: 't-smoke-bare',
+    args: ['rsbuild2'],
+    extra: ['AGENTS.md'],
+  },
 ];
 
 let passed = 0;

@@ -23,10 +23,28 @@ LJS 体系脚手架。用一条命令生成一个**已集成 ljs-tools 的完整
 无需安装，直接用 npm create：
 
 ```bash
-npm create ljs@latest <目录名> -t <模板> -y
+npm create ljs@latest <目录名> -t <模板>
 ```
 
-**AI 调用约定（重要）**：始终加 `-y` 和 `-t`，避免 CLI 等待 stdin 交互而卡住。
+**AI 调用约定（重要）**：始终加 `-t` 指定模板。指定模板后 CLI 自动进入非交互模式，不会等待 stdin 而卡住。
+
+### ⚠️ npm create 的参数过滤陷阱
+
+`npm create` 会**丢掉 `-` 开头的参数**。因此：
+
+```bash
+npm create ljs@latest my-app -t h5 -y
+# 实际只传给 CLI：my-app h5 （-t 和 -y 都被吞了）
+```
+
+CLI 已做容错：裸值 `rsbuild` / `rsbuild2` / `h5` 会被识别为模板，
+`miniprogram` / `standalone` 会被识别为 H5 入口。所以上面这行**依然可用**。
+
+若需要绝对明确，用 `--` 显式分隔（推荐给脚本 / CI）：
+
+```bash
+npm create ljs@latest my-app -- -t h5 --h5-entry standalone -y
+```
 
 ## 参数
 

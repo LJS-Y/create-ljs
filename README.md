@@ -46,6 +46,11 @@ npm create ljs@latest my-h5 -t h5 --h5-entry standalone
   -h, --help            显示帮助
 ```
 
+> **关于参数传递**：`npm create` 会丢掉 `-` 开头的参数。本 CLI 已做容错——裸值
+> `rsbuild`/`rsbuild2`/`h5` 会被识别为模板，`miniprogram`/`standalone` 识别为 H5 入口，
+> 所以 `npm create ljs@latest my-app h5 standalone` 也能用。需要绝对明确时用 `--` 分隔：
+> `npm create ljs@latest my-app -- -t h5 --h5-entry standalone`。
+
 ## H5 的两种入口
 
 `h5` 模板会追问一个问题：**这个页面从哪里进入？**
