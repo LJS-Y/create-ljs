@@ -75,6 +75,8 @@ npm run dev
 - **`AGENTS.md`** — 写给 AI 协作者的项目约定（技术栈、目录约定、常见任务手册、红线）。用 AI 写代码前让它先读这份。
 - **`README.md`** — 写给人类的项目说明。
 
+三个模板（`rsbuild` / `rsbuild2` / `h5`）都带 `AGENTS.md` 与 `CLAUDE.md`。
+
 ## 与 ljs-tools 的关系
 
 生成的工程已内置 [ljs-tools](https://www.npmjs.com/package/ljs-tools)（Vue3 工具库 + 常用组件）。

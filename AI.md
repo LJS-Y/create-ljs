@@ -107,7 +107,7 @@ npm create ljs@latest my-app -- -t h5 --h5-entry standalone -y
 
 ## 已知坑
 
-- **`h5` 模板没有 AGENTS.md**：目前只有 `rsbuild` / `rsbuild2` 已打样约定包。让 AI 在 h5 工程里写代码前，需人工补充技术栈背景。
+- **三个模板都带 AGENTS.md**：`rsbuild` / `rsbuild2` / `h5` 均含 `AGENTS.md` 与 `CLAUDE.md`（字节一致的副本）。让 AI 在生成工程里写代码前，先让它读 `AGENTS.md`。
 - **模板内 `package-lock.json` 是源仓库的锁文件**：生成后建议删掉重新 `npm install`，避免锁文件与项目名不符造成困惑。
 - **生成目录不能非空**：目标已存在且非空时直接报错退出，不会覆盖。需用户自行清理或换名。
 - **`npm create ljs` 指向的包名是 `create-ljs`**：npm 的 create 语法会自动补 `create-` 前缀，因此包名必须是 `create-ljs`，命令写作 `npm create ljs@latest`。

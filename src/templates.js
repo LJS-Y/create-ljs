@@ -29,8 +29,7 @@ export const TEMPLATES = [
     name: 'H5 移动端（Rsbuild 2.x）',
     dir: 'ljs-h5',
     description: '移动端 H5：Vue3 + Rsbuild 2.x + Vant。可作为微信小程序 web-view 内嵌页，也可独立部署。',
-    requires: ['vant'],
-    // H5 的入口方式决定是否保留登录页与路由守卫逻辑
+    requires: ['vant'],    // H5 的入口方式决定是否保留登录页与路由守卫逻辑
     questions: [
       {
         key: 'entry',

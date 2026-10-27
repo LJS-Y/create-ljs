@@ -28,7 +28,7 @@ const CASES = [
     id: 'h5 miniprogram',
     dir: 't-smoke-h5-mp',
     args: ['-t', 'h5', '--h5-entry', 'miniprogram', '-y'],
-    extra: [],
+    extra: ['AGENTS.md'],
     // 小程序模式不应有登录页
     absent: ['src/views/login'],
   },
@@ -36,7 +36,7 @@ const CASES = [
     id: 'h5 standalone',
     dir: 't-smoke-h5-sa',
     args: ['-t', 'h5', '--h5-entry', 'standalone', '-y'],
-    extra: ['src/views/login'],
+    extra: ['src/views/login', 'AGENTS.md'],
   },
   {
     // npm create 会过滤 - 开头的参数，只剩裸值。此处模拟该场景，
