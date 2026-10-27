@@ -1,0 +1,50 @@
+{
+  "name": "create-ljs",
+  "version": "0.1.0",
+  "description": "LJS 体系脚手架：一条命令生成可跑的中后台 / H5 工程（Vue3 + Rsbuild + Element Plus + ljs-tools）",
+  "type": "module",
+  "bin": {
+    "create-ljs": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "src",
+    "templates",
+    "README.md",
+    "AI.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "create",
+    "scaffold",
+    "cli",
+    "vue3",
+    "rsbuild",
+    "admin",
+    "ljs",
+    "ljs-tools",
+    "element-plus",
+    "template",
+    "boilerplate",
+    "中后台",
+    "脚手架"
+  ],
+  "main": "./index.js",
+  "module": "./index.js",
+  "author": "龙九山",
+  "license": "MIT",
+  "homepage": "https://github.com/LJS-Y/ljs-vue3",
+  "bugs": {
+    "url": "https://github.com/LJS-Y/ljs-vue3/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LJS-Y/ljs-vue3.git",
+    "directory": "create-ljs"
+  },
+  "scripts": {
+    "test:smoke": "node scripts/smoke.mjs"
+  }
+}
