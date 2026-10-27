@@ -35,14 +35,13 @@
   "module": "./index.js",
   "author": "龙九山",
   "license": "MIT",
-  "homepage": "https://github.com/LJS-Y/ljs-vue3",
+  "homepage": "https://github.com/LJS-Y/create-ljs",
   "bugs": {
-    "url": "https://github.com/LJS-Y/ljs-vue3/issues"
+    "url": "https://github.com/LJS-Y/create-ljs/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LJS-Y/ljs-vue3.git",
-    "directory": "create-ljs"
+    "url": "git+https://github.com/LJS-Y/create-ljs.git"
   },
   "scripts": {
     "test:smoke": "node scripts/smoke.mjs"
