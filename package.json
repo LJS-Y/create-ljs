@@ -1,6 +1,6 @@
 {
   "name": "create-ljs",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "LJS 体系脚手架：一条命令生成可跑的中后台 / H5 工程（Vue3 + Rsbuild + Element Plus + ljs-tools）",
   "type": "module",
   "bin": {
