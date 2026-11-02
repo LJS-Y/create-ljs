@@ -184,6 +184,12 @@ async function main() {
   const argv = process.argv.slice(2);
   const dryRun = argv.includes('--dry-run');
   const check = argv.includes('--check');
+  /**
+   * 源仓库不存在时不致命。
+   * 场景：从 npm 安装的包里、或只想跑冒烟测试的机器上，没有 ../ljs-vue3 是正常的。
+   * 此时同步/校验无从谈起，直接跳过并以 0 退出，避免挡住 prepublish 等流程。
+   */
+  const allowMissingSource = argv.includes('--allow-missing-source');
 
   console.log('');
   console.log('  create-ljs · 模板同步');
@@ -194,8 +200,16 @@ async function main() {
 
   const srcRootExists = await fs.access(SOURCE_ROOT).then(() => true).catch(() => false);
   if (!srcRootExists) {
-    console.error(`  ✖ 找不到 ljs-vue3 仓库：${SOURCE_ROOT}`);
-    console.error('     可用环境变量 LJS_VUE3_ROOT 指定路径。');
+    const msg = `找不到 ljs-vue3 仓库：${SOURCE_ROOT}`;
+    if (allowMissingSource) {
+      console.log(`  ⚠️ ${msg}`);
+      console.log('     --allow-missing-source：跳过模板同步校验。');
+      console.log('');
+      return;
+    }
+    console.error(`  ✖ ${msg}`);
+    console.error('     可用环境变量 LJS_VUE3_ROOT 指定路径；');
+    console.error('     若此处本就无需同步（如从 npm 安装的包内），加 --allow-missing-source 跳过。');
     process.exit(1);
   }
 

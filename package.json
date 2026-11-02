@@ -47,6 +47,8 @@
     "test:smoke": "node scripts/smoke.mjs",
     "sync": "node scripts/sync-templates.mjs",
     "sync:dry": "node scripts/sync-templates.mjs --dry-run",
-    "check:tpl": "node scripts/sync-templates.mjs --check"
+    "check:tpl": "node scripts/sync-templates.mjs --check",
+    "check:tpl:ci": "node scripts/sync-templates.mjs --check --allow-missing-source",
+    "prepublishOnly": "npm run check:tpl:ci && npm run test:smoke"
   }
 }
