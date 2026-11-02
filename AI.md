@@ -108,11 +108,53 @@ npm create ljs@latest my-app -- -t h5 --h5-entry standalone -y
 ## 已知坑
 
 - **三个模板都带 AGENTS.md**：`rsbuild` / `rsbuild2` / `h5` 均含 `AGENTS.md` 与 `CLAUDE.md`（字节一致的副本）。让 AI 在生成工程里写代码前，先让它读 `AGENTS.md`。
-- **模板内 `package-lock.json` 是源仓库的锁文件**：生成后建议删掉重新 `npm install`，避免锁文件与项目名不符造成困惑。
+- **模板内 `package-lock.json` 是模板自带的锁文件**：生成时 `scaffold` 会把它的 `name` 与 `packages[""].name` 改写成目标目录名，所以**不要删**。若希望锁文件与最新依赖完全对齐，生成后自行删掉重新 `npm install` 也可。
 - **生成目录不能非空**：目标已存在且非空时直接报错退出，不会覆盖。需用户自行清理或换名。
 - **`npm create ljs` 指向的包名是 `create-ljs`**：npm 的 create 语法会自动补 `create-` 前缀，因此包名必须是 `create-ljs`，命令写作 `npm create ljs@latest`。
 - **本工具不联网**：模板随包分发，离线可用。但 `npm install` 依赖仍需网络。
 - **Windows 换行**：模板文件随包以 LF 发布，检出后由用户本机 git 配置决定；本包不含 .gitattributes。
+
+## 模板维护约定（改模板前必读）
+
+`templates/` 下三个目录是 `ljs-vue3` 仓库同名模板工程的副本，**源头在 `ljs-vue3`，不在这里**。
+
+> **改模板的姿势：先改 `ljs-vue3`，再同步过来。不要直接改 `templates/`。**
+
+### 为什么
+
+手工拷贝会漂移。曾出现过：`ljs-vue3` 已删除废弃的 `unplugin` 依赖与 resolver，
+但 `templates/` 仍是旧副本 —— 用户 `npm create ljs` 拿到的就是带废弃配置的旧代码，
+而冒烟测试只校验文件是否存在，**发现不了这类内容问题**。
+
+### 三条命令
+
+```bash
+npm run sync        # 从 ../ljs-vue3 同步到 templates/（镜像语义：源删则目标也删）
+npm run sync:dry    # 预演，只看会改什么，不写盘
+npm run check:tpl   # 只校验一致性；不一致则非 0 退出（可接 CI）
+```
+
+源目录可用环境变量指定：`LJS_VUE3_ROOT=/path/to/ljs-vue3 npm run sync`
+
+### 同步规则
+
+| 类别 | 处理 |
+| --- | --- |
+| 一般文件 | 源有则覆盖，源无则从目标删除 |
+| `node_modules` / `dist` / `.git` / `.github` | 跳过 |
+| `*.local` / `*.log*` / `.DS_Store` | 跳过 |
+| **`package-lock.json`** | **保留本地，不用源覆盖，也不因源缺失而删除**（生成时由 `scaffold` 改写 name）|
+
+### 改完怎么验
+
+```bash
+npm run check:tpl    # 模板与源头一致
+npm run test:smoke   # 生成 5 种组合并校验内容（含废弃配置断言）
+```
+
+`test:smoke` 会断言生成物中**不得出现**：`unplugin-auto-import`、`unplugin-vue-components`、
+`ElementPlusResolver`、`AutoComponents(` —— 这是防漂移的最后一道闸。
+
 
 ## 典型调用（给 AI 的抄写样本）
 

@@ -85,6 +85,30 @@ npm run dev
 - 组件可直接用：`<Pagination>`、`<DictTag>`、`<DateRange>`
 - API 文档：https://ljs-y.github.io/ljs-vue3
 
+## 维护者：模板同步
+
+`templates/` 是 [ljs-vue3](https://github.com/LJS-Y/ljs-vue3) 里同名模板工程的**副本**，
+源头在那边。**改模板请先改 `ljs-vue3`，再同步过来**，不要直接改 `templates/`。
+
+```bash
+npm run sync        # 从 ../ljs-vue3 同步（镜像语义：源删则目标也删）
+npm run sync:dry    # 预演，只看会改什么
+npm run check:tpl   # 只校验一致性，不一致则非 0 退出（可接 CI）
+```
+
+同步会跳过 `node_modules` / `dist` / `.git` / `*.local` / `*.log*`；
+`package-lock.json` 保留本地不覆盖（生成时由 `scaffold` 改写 `name`）。
+
+改完后跑两条验证：
+
+```bash
+npm run check:tpl    # 模板与源头一致
+npm run test:smoke   # 生成 5 种组合，校验结构 + 内容（含废弃配置断言）
+```
+
+> 为什么要有这套：手工拷贝会漂移。曾出现过源头已删除废弃依赖、副本还留着的情况，
+> 用户生成出来的工程就带着废弃配置，而纯结构校验的测试发现不了。
+
 ## 许可
 
 MIT

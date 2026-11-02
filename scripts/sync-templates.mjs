@@ -41,10 +41,12 @@ const SOURCE_ROOT = path.resolve(
  * 不同步的条目
  * - node_modules / dist                               依赖与产物
  * - .git / .github                                    版本控制
- * - package-lock.json                                 由目标工程 npm install 重新生成，
- *                                                     且各模板锁文件版本差异大，同步反而引入噪音
  * - .DS_Store / Thumbs.db                             系统垃圾
  * - *.local / *.log*                                  本地配置与日志
+ *
+ * package-lock.json 的处理是特例，见 KEEP_LOCAL：
+ * 它在 templates/ 里是「有意保留」的（生成时由 scaffold 改写 name），
+ * 但不应从源仓库覆盖（源仓库的锁文件面向模板工程自身，版本可能不同）。
  */
 const SKIP_NAMES = new Set([
   'node_modules',
@@ -52,18 +54,25 @@ const SKIP_NAMES = new Set([
   'dist-ssr',
   '.git',
   '.github',
-  'package-lock.json',
   '.DS_Store',
   'Thumbs.db',
   '.cache',
   'coverage',
 ]);
 
+/** 保留在目标、不随源同步、也不因源缺失而删除的条目 */
+const KEEP_LOCAL = new Set(['package-lock.json']);
+
 function shouldSkip(name) {
   if (SKIP_NAMES.has(name)) return true;
   if (name.endsWith('.local')) return true;
   if (/\.log(\.|$)/.test(name)) return true;
   return false;
+}
+
+/** 该条目是否「保留在目标、不参与同步」 */
+function isKeepLocal(rel) {
+  return KEEP_LOCAL.has(path.basename(rel));
 }
 
 /**
@@ -125,6 +134,7 @@ async function syncOne(template, opts) {
 
   // 新增 / 变更
   for (const rel of srcFiles) {
+    if (isKeepLocal(rel)) continue; // lock 等保留本地，不用源覆盖
     const srcAbs = path.join(srcDir, rel);
     const dstAbs = path.join(dstDir, rel);
     const [srcBuf, dstBuf] = await Promise.all([
@@ -151,6 +161,7 @@ async function syncOne(template, opts) {
   // 删除（源已不存在的）
   for (const rel of dstFiles) {
     if (srcFiles.has(rel)) continue;
+    if (isKeepLocal(rel)) continue; // lock 等保留本地，不因源缺失而删
     removed.push(rel);
     if (!opts.dryRun && !opts.check) {
       await fs.rm(path.join(dstDir, rel), { force: true });
