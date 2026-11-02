@@ -51,6 +51,18 @@ const CASES = [
 let passed = 0;
 let failed = 0;
 
+/**
+ * 废弃配置关键词：出现在生成物里说明模板未同步。
+ * 背景：这些配置曾随「删除失效的 unplugin 解析器」一并移除，
+ * 若模板是旧副本就会带出来，而结构校验发现不了，故在此做内容断言。
+ */
+const FORBIDDEN_IN_CONFIG = [
+  { re: /unplugin-auto-import/, hint: 'unplugin-auto-import 已废弃，应从 package.json 移除' },
+  { re: /unplugin-vue-components/, hint: 'unplugin-vue-components 已废弃，应从 package.json 移除' },
+  { re: /ElementPlusResolver/, hint: 'ElementPlusResolver 已废弃，应从构建配置移除' },
+  { re: /AutoComponents\s*\(/, hint: 'AutoComponents 已废弃，应从构建配置移除' },
+];
+
 const tmpRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'create-ljs-smoke-'));
 
 try {
@@ -83,7 +95,8 @@ try {
       }
 
       // package.json 的 name 应被改写为目录名
-      const pkg = JSON.parse(await fs.readFile(path.join(target, 'package.json'), 'utf8'));
+      const pkgRaw = await fs.readFile(path.join(target, 'package.json'), 'utf8');
+      const pkg = JSON.parse(pkgRaw);
       if (pkg.name !== testCase.dir) {
         problems.push(`package.json name 未改写（期望 ${testCase.dir}，实际 ${pkg.name}）`);
       }
@@ -109,6 +122,25 @@ try {
           .then(() => true)
           .catch(() => false);
         if (exists) problems.push(`不应带入 ${skip}`);
+      }
+
+      // 【新增】废弃配置检查：同步漂移会在这里暴露
+      // 只看「非注释行」——移除时会在原地留说明性注释，那是合规的。
+      // 注意：模板可能是 CRLF 换行，逐行处理时需容忍行尾 \r。
+      const stripLineComments = (text) =>
+        text
+          .split(/\r?\n/)
+          .map((line) => (/^\s*\/\//.test(line) ? '' : line))
+          .join('\n');
+
+      const buildConfig = await fs
+        .readFile(path.join(target, 'rsbuild.config.mjs'), 'utf8')
+        .catch(() => '');
+      const pkgCode = stripLineComments(pkgRaw);
+      const configCode = stripLineComments(buildConfig);
+      for (const rule of FORBIDDEN_IN_CONFIG) {
+        if (rule.re.test(pkgCode)) problems.push(`package.json 含废弃依赖：${rule.hint}`);
+        if (rule.re.test(configCode)) problems.push(`构建配置含废弃配置：${rule.hint}`);
       }
 
       if (problems.length === 0) {
